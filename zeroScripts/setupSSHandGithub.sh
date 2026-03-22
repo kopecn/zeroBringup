@@ -4,7 +4,7 @@ set -euo pipefail
 
 # === CONFIGURATION ===
 HOSTNAME_ID=$(hostname)
-KEY_NAME="id_rsa_github_${HOSTNAME_ID}"
+KEY_NAME="id_ed25519_github_${HOSTNAME_ID}"
 KEY_FILE="$HOME/.ssh/$KEY_NAME"
 EMAIL=$(git config --get user.email || echo "")
 SSH_CONFIG="$HOME/.ssh/config"
@@ -14,7 +14,7 @@ GITHUB_SSH_URL="https://github.com/settings/ssh/new"
 
 generate_ssh_key() {
     echo "🔐 Generating new SSH key..."
-    read -p "Enter email for SSH key [${EMAIL}]: " input_email
+    read -rp "Enter email for SSH key [${EMAIL}]: " input_email
     EMAIL="${input_email:-$EMAIL}"
 
     if [[ -z "$EMAIL" ]]; then
@@ -22,7 +22,7 @@ generate_ssh_key() {
         exit 1
     fi
 
-    ssh-keygen -t rsa -b 4096 -C "$EMAIL" -f "$KEY_FILE" -N ""
+    ssh-keygen -t ed25519 -C "$EMAIL" -f "$KEY_FILE"
     echo "✅ SSH key generated at $KEY_FILE"
 }
 
@@ -89,8 +89,25 @@ secure_ssh_permissions() {
 test_github_connection() {
     echo "🔌 Testing SSH connection to GitHub..."
 
-    # Suppress host key prompt by adding github.com to known_hosts if missing
-    ssh-keygen -F github.com >/dev/null || ssh-keyscan github.com >> "$HOME/.ssh/known_hosts"
+    # Add github.com to known_hosts only after verifying its fingerprint matches
+    # GitHub's published ED25519 fingerprint (https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints)
+    local KNOWN_GITHUB_FINGERPRINT="SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU"
+    if ! ssh-keygen -F github.com >/dev/null 2>&1; then
+        echo "🔍 Verifying GitHub host key fingerprint..."
+        local SCANNED_KEY
+        SCANNED_KEY=$(ssh-keyscan -t ed25519 github.com 2>/dev/null)
+        local SCANNED_FINGERPRINT
+        SCANNED_FINGERPRINT=$(echo "$SCANNED_KEY" | ssh-keygen -lf /dev/stdin 2>/dev/null | awk '{print $2}')
+        if [[ "$SCANNED_FINGERPRINT" != "$KNOWN_GITHUB_FINGERPRINT" ]]; then
+            echo "❌ GitHub host key fingerprint mismatch!"
+            echo "   Expected: $KNOWN_GITHUB_FINGERPRINT"
+            echo "   Got:      $SCANNED_FINGERPRINT"
+            echo "   Possible MITM attack. Aborting."
+            exit 1
+        fi
+        echo "$SCANNED_KEY" >> "$HOME/.ssh/known_hosts"
+        echo "✅ GitHub host key verified and added to known_hosts."
+    fi
 
     OUTPUT=$(ssh -T git@github.com 2>&1 || true)
 
@@ -140,6 +157,6 @@ secure_ssh_permissions
 show_public_key
 open_github_ssh_page
 
-read -p "⏳ Press ENTER after you've added the SSH key to GitHub..."
+read -rp "⏳ Press ENTER after you've added the SSH key to GitHub..."
 
 test_github_connection

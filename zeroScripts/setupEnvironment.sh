@@ -1,6 +1,17 @@
 #!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
 
-USER_NAME=$(git config --global github.user)
+USER_NAME=$(git config --global github.user 2>/dev/null || echo "")
+
+if [[ -z "$USER_NAME" ]]; then
+    read -rp "Enter your GitHub username: " USER_NAME
+    if [[ -z "$USER_NAME" ]]; then
+        echo "❌ GitHub username is required. Aborting."
+        exit 1
+    fi
+    git config --global github.user "$USER_NAME"
+fi
 
 # Array of repository URLs
 REPOS=(

@@ -9,6 +9,7 @@ OS_TYPE=""
 if [[ "$(uname)" == "Darwin" ]]; then
     OS_TYPE="macOS"
 elif [[ -f /etc/os-release ]]; then
+    # shellcheck source=/dev/null
     . /etc/os-release
     if [[ "$ID" == "ubuntu" ]]; then
         OS_TYPE="ubuntu"

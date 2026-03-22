@@ -1,8 +1,10 @@
 #!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
 
-# Define the path to add (convert to absolute path)
+# Define the path to add — already absolute since it is rooted at $HOME
 TARGET_DIR="$HOME/__Workspaces__/bashWorkspaces/bashTools/hostScripts"
-ABS_TARGET_DIR="$(realpath "$TARGET_DIR")"
+ABS_TARGET_DIR="$TARGET_DIR"
 
 # Function to add line to shell config if not already present
 add_to_shell_config() {

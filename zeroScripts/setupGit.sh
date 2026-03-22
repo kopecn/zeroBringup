@@ -1,7 +1,24 @@
 #!/bin/bash
+# =============================================================================
+# Script Name  : setupGit.sh
+# Description  : Installs git (via apt on Ubuntu, Homebrew on macOS) and
+#                configures the global git user.name and user.email.
+# Prerequisites: Ubuntu with sudo access, or macOS with Homebrew installed
+# Side Effects : Installs the git package; writes to ~/.gitconfig
+# =============================================================================
 set -euo pipefail
 IFS=$'\n\t'
 
+# -----------------------------------------------------------------------------
+# set_git_config
+#   Prompts the user for a git display name and email, pre-filling with any
+#   values already present in the global git config. Trims whitespace from
+#   both inputs, confirms with the user, then writes the values to the global
+#   git config (git config --global user.name / user.email).
+#
+# Returns:
+#   0 always — skips writing config if the user cancels or leaves fields empty
+# -----------------------------------------------------------------------------
 set_git_config() {
   # Use any existing git config values as defaults
   local default_name
@@ -19,7 +36,9 @@ set_git_config() {
   git_user_name="${git_user_name:-$default_name}"
   git_user_email="${git_user_email:-$default_email}"
 
-  # Trim leading/trailing whitespace
+  # Trim leading/trailing whitespace using parameter expansion:
+  #   ${var#"${var%%[![:space:]]*}"}  strips leading whitespace
+  #   ${var%"${var##*[![:space:]]}"}  strips trailing whitespace
   git_user_name="${git_user_name#"${git_user_name%%[![:space:]]*}"}"
   git_user_name="${git_user_name%"${git_user_name##*[![:space:]]}"}"
   git_user_email="${git_user_email#"${git_user_email%%[![:space:]]*}"}"

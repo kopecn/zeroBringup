@@ -74,6 +74,18 @@ open_github_ssh_page() {
     fi
 }
 
+secure_ssh_permissions() {
+    echo "🔒 Securing SSH directory permissions..."
+
+    touch "$HOME/.ssh/authorized_keys"
+
+    chmod 700 "$HOME/.ssh"
+    chmod 600 "$HOME/.ssh"/*
+    chmod 644 "$HOME/.ssh"/*.pub 2>/dev/null || true
+
+    echo "✅ SSH permissions secured."
+}
+
 test_github_connection() {
     echo "🔌 Testing SSH connection to GitHub..."
 
@@ -124,6 +136,7 @@ fi
 generate_ssh_key
 start_ssh_agent
 update_ssh_config
+secure_ssh_permissions
 show_public_key
 open_github_ssh_page
 

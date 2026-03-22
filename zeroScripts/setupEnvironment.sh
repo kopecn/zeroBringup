@@ -31,6 +31,7 @@ REPOS=(
   "git@github.com:$USER_NAME/Environments.git"
   "git@github.com:$USER_NAME/bashTools.git"
   "git@github.com:$USER_NAME/zeroBringup.git"
+  "git@github.com:$USER_NAME/productivity-macOS.git"
 )
 
 # Target paths are relative to BASE_DIR ($HOME). Must be the same length as REPOS.
@@ -38,6 +39,7 @@ FOLDERS=(
   "__Environments__/Environments"
   "__Workspaces__/bashWorkspaces/bashTools"
   "__Workspaces__/bashWorkspaces/zeroBringup"
+  "__Workspaces__/productivityWorkspaces/productivity-macOS"
 )
 
 # Base directory where all repos will be cloned

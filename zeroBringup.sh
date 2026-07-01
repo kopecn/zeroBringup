@@ -28,7 +28,7 @@ SUPPORTED_LINUX=(ubuntu fedora)
 
 # 1. Detect base OS
 UNAME=$(uname)
-if [[ " ${SUPPORTED_OS[*]} " =~ " ${UNAME} " ]]; then
+if [[ " ${SUPPORTED_OS[@]} " =~ " ${UNAME} " ]]; then
     OS_TYPE="$UNAME"
 else
     echo "❌ Unsupported OS. Supported: ${SUPPORTED_OS[*]}"; exit 1

@@ -76,7 +76,7 @@ echo "Using GitHub username: $GITHUB_USER"
 #   1. common/setupSSHandGithub.sh — generate ED25519 SSH key, configure GitHub
 #   2. common/setupEnvironment.sh  — clone personal repos to standard layout
 #   3. common/linkBashTools.sh     — append bashTools/hostScripts to PATH
-if [[ "$OS_TYPE" == "macOS" ]]; then
+if [[ "$OS_TYPE" == "Darwin" ]]; then
     scripts=(
         "macOS/setupXcodeAndBrew.sh"
         "macOS/setupGit.sh"
@@ -84,13 +84,16 @@ if [[ "$OS_TYPE" == "macOS" ]]; then
         "common/setupEnvironment.sh"
         "common/linkBashTools.sh"
     )
-else
+elif [[ "$OS_TYPE" == "ubuntu" ]]; then
     scripts=(
         "ubuntu/setupGit.sh"
         "common/setupSSHandGithub.sh"
         "common/setupEnvironment.sh"
         "common/linkBashTools.sh"
     )
+else
+    echo "❌ No scripts defined for OS: $OS_TYPE"
+    exit 1
 fi
 
 # Run scripts. Fetch and execute as two steps: a command substitution swallows

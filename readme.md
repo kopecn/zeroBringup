@@ -15,14 +15,14 @@ keep working.
 
 Scripts live in `zeroScripts/`, split by responsibility:
 
-| Folder | Script | Runs on | Purpose |
-|--------|--------|---------|---------|
-| `macOS/` | `setupXcodeAndBrew.sh` | macOS | Install Xcode Command Line Tools + Homebrew |
-| `macOS/` | `setupGit.sh` | macOS | `brew install git`; set global user.name/email |
-| `ubuntu/` | `setupGit.sh` | Ubuntu | `apt install git`; set global user.name/email |
-| `common/` | `setupSSHandGithub.sh` | both | Generate ED25519 SSH key, configure & verify GitHub |
-| `common/` | `pullBashTools.sh` | both | Clone personal repos into the standard layout |
-| `common/` | `linkBashTools.sh` | both | Append `bashTools/hostScripts` to PATH |
+| Folder    | Script                 | Runs on | Purpose                                             |
+| --------- | ---------------------- | ------- | --------------------------------------------------- |
+| `macOS/`  | `setupXcodeAndBrew.sh` | macOS   | Install Xcode Command Line Tools + Homebrew         |
+| `macOS/`  | `setupGit.sh`          | macOS   | `brew install git`; set global user.name/email      |
+| `ubuntu/` | `setupGit.sh`          | Ubuntu  | `apt install git`; set global user.name/email       |
+| `common/` | `setupSSHandGithub.sh` | both    | Generate ED25519 SSH key, configure & verify GitHub |
+| `common/` | `pullBashTools.sh`     | both    | Clone personal repos into the standard layout       |
+| `common/` | `linkBashTools.sh`     | both    | Append `bashTools/hostScripts` to PATH              |
 
 The OS-specific batch runs first (it installs the prerequisites the common batch
 depends on), then the common batch runs identically on both platforms.

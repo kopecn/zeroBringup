@@ -1,20 +1,44 @@
 #!/bin/bash
-set -e  # Exit on any error
+# =============================================================================
+# Script Name  : setupGit.sh
+# Description  : Installs git (via apt on Ubuntu, Homebrew on macOS) and
+#                configures the global git user.name and user.email.
+# Prerequisites: Ubuntu with sudo access, or macOS with Homebrew installed
+# Side Effects : Installs the git package; writes to ~/.gitconfig
+# =============================================================================
+set -euo pipefail
+IFS=$'\n\t'
 
+# -----------------------------------------------------------------------------
+# set_git_config
+#   Prompts the user for a git display name and email, pre-filling with any
+#   values already present in the global git config. Trims whitespace from
+#   both inputs, confirms with the user, then writes the values to the global
+#   git config (git config --global user.name / user.email).
+#
+# Returns:
+#   0 always — skips writing config if the user cancels or leaves fields empty
+# -----------------------------------------------------------------------------
 set_git_config() {
-  # Hardcoded defaults
-  local default_name="kopecn"
-  local default_email="nicholas.bergantz@gmail.com"
+  # Use any existing git config values as defaults
+  local default_name
+  local default_email
+  default_name=$(git config --global user.name 2>/dev/null || echo "")
+  default_email=$(git config --global user.email 2>/dev/null || echo "")
 
-  # Prompt with hardcoded defaults shown in brackets
-  read -rp "Enter your Git user name [${default_name}]: " git_user_name
-  read -rp "Enter your Git email [${default_email}]: " git_user_email
+  # Prompt — show existing value in brackets if present, otherwise mark required
+  local name_hint="${default_name:-(required)}"
+  local email_hint="${default_email:-(required)}"
+  read -rp "Enter your Git user name [${name_hint}]: " git_user_name
+  read -rp "Enter your Git email [${email_hint}]: " git_user_email
 
-  # Use defaults if input empty
+  # Use existing config value if user pressed Enter with no input
   git_user_name="${git_user_name:-$default_name}"
   git_user_email="${git_user_email:-$default_email}"
 
-  # Trim leading/trailing whitespace
+  # Trim leading/trailing whitespace using parameter expansion:
+  #   ${var#"${var%%[![:space:]]*}"}  strips leading whitespace
+  #   ${var%"${var##*[![:space:]]}"}  strips trailing whitespace
   git_user_name="${git_user_name#"${git_user_name%%[![:space:]]*}"}"
   git_user_name="${git_user_name%"${git_user_name##*[![:space:]]}"}"
   git_user_email="${git_user_email#"${git_user_email%%[![:space:]]*}"}"
@@ -51,8 +75,14 @@ fi
 echo "Detected OS: $OS"
 
 if [[ "$OS" == "ubuntu" ]]; then
+  echo "This will run: sudo apt update && sudo apt install git"
+  read -rp "Continue? (y/N): " apt_confirm
+  if [[ ! "$apt_confirm" =~ ^[Yy]$ ]]; then
+    echo "Aborted."
+    exit 1
+  fi
   sudo apt update
-  sudo apt install -y git
+  sudo apt install git
 elif [[ "$OS" == "darwin" ]]; then
   # Check if Homebrew is installed
   if ! command -v brew &> /dev/null; then

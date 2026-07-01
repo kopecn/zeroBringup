@@ -6,24 +6,16 @@
 #                has already been cloned (idempotent).
 # Prerequisites: SSH/GitHub authentication must be configured (run
 #                setupSSHandGithub.sh first); git must be installed
-# Side Effects : Creates directories under $HOME and clones repositories;
-#                stores the GitHub username in git config global github.user
+# Side Effects : Creates directories under $HOME and clones repositories.
+#                The GitHub username comes from $GITHUB_USER (exported by
+#                zeroBringup.sh) or an interactive prompt when run standalone.
 # =============================================================================
 set -euo pipefail
 IFS=$'\n\t'
 
-# Resolve the GitHub username — first try the stored git config value so
-# the script can run non-interactively after the first execution.
-USER_NAME=$(git config --global github.user 2>/dev/null || echo "")
-
-if [[ -z "$USER_NAME" ]]; then
-    read -rp "Enter your GitHub username: " USER_NAME
-    if [[ -z "$USER_NAME" ]]; then
-        echo "❌ GitHub username is required. Aborting."
-        exit 1
-    fi
-    git config --global github.user "$USER_NAME"
-fi
+# GitHub username is resolved and exported by zeroBringup.sh (GITHUB_USER),
+# defaulting to "kopecn" if unset (e.g. run standalone).
+USER_NAME="${GITHUB_USER:-kopecn}"
 
 # Parallel arrays: REPOS[i] is cloned into $HOME/FOLDERS[i].
 # To add a new repository, append one entry to each array (keep them in sync).

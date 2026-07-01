@@ -1,9 +1,10 @@
 #!/bin/bash
 # =============================================================================
-# Script Name  : setupGit.sh
-# Description  : Installs git (via apt on Ubuntu, Homebrew on macOS) and
-#                configures the global git user.name and user.email.
-# Prerequisites: Ubuntu with sudo access, or macOS with Homebrew installed
+# Script Name  : setupGit.sh (ubuntu)
+# Description  : Installs git via apt and configures the global git user.name
+#                and user.email. Ubuntu-only; the macOS equivalent lives in
+#                zeroScripts/macOS/setupGit.sh.
+# Prerequisites: Ubuntu with sudo access
 # Side Effects : Installs the git package; writes to ~/.gitconfig
 # =============================================================================
 set -euo pipefail
@@ -61,36 +62,21 @@ set_git_config() {
   fi
 }
 
-# Detect OS
-OS=""
-if [[ "$(uname)" == "Darwin" ]]; then
-  OS="darwin"
-elif grep -qi '^ID=ubuntu' /etc/os-release 2>/dev/null; then
-  OS="ubuntu"
-else
-  echo "Unsupported OS. This script supports only Ubuntu or macOS (Darwin). Exiting."
+# Sanity guard: this variant is apt-based and Ubuntu-only.
+if ! grep -qi '^ID=ubuntu' /etc/os-release 2>/dev/null; then
+  echo "❌ This is the Ubuntu variant (apt) but a non-Ubuntu OS was detected."
+  echo "   On macOS run zeroScripts/macOS/setupGit.sh instead. Exiting."
   exit 1
 fi
 
-echo "Detected OS: $OS"
-
-if [[ "$OS" == "ubuntu" ]]; then
-  echo "This will run: sudo apt update && sudo apt install git"
-  read -rp "Continue? (y/N): " apt_confirm
-  if [[ ! "$apt_confirm" =~ ^[Yy]$ ]]; then
-    echo "Aborted."
-    exit 1
-  fi
-  sudo apt update
-  sudo apt install git
-elif [[ "$OS" == "darwin" ]]; then
-  # Check if Homebrew is installed
-  if ! command -v brew &> /dev/null; then
-    echo "Homebrew is not installed. Please install Homebrew first: https://brew.sh/"
-    exit 1
-  fi
-  brew install git
+echo "This will run: sudo apt update && sudo apt install -y git"
+read -rp "Continue? (y/N): " apt_confirm
+if [[ ! "$apt_confirm" =~ ^[Yy]$ ]]; then
+  echo "Aborted."
+  exit 1
 fi
+sudo apt update
+sudo apt install -y git
 
 git --version
 

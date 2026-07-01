@@ -12,6 +12,14 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+# --- Positional contract (forwarded by zeroBringup.sh to every sub-script) ----
+# $1 = GitHub project/owner, $2 = GitHub user. Accepted for a uniform calling
+# convention; this script does not use them.
+# shellcheck disable=SC2034
+GITHUB_PROJECT="${1:-kopecn}"
+# shellcheck disable=SC2034
+GITHUB_USER="${2:-kopecn}"
+
 # -----------------------------------------------------------------------------
 # set_git_config
 #   Prompts the user for a git display name and email, pre-filling with any
@@ -32,8 +40,8 @@ set_git_config() {
   # Prompt — show existing value in brackets if present, otherwise mark required
   local name_hint="${default_name:-(required)}"
   local email_hint="${default_email:-(required)}"
-  read -rp "Enter your Git user name [${name_hint}]: " git_user_name
-  read -rp "Enter your Git email [${email_hint}]: " git_user_email
+  read -rp "Setting Git user name for this host [${name_hint}]: " git_user_name
+  read -rp "Setting Git email for this host [${email_hint}]: " git_user_email
 
   # Use existing config value if user pressed Enter with no input
   git_user_name="${git_user_name:-$default_name}"

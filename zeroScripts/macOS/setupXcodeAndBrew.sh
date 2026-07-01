@@ -14,6 +14,14 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+# --- Positional contract (forwarded by zeroBringup.sh to every sub-script) ----
+# $1 = GitHub project/owner, $2 = GitHub user. Accepted for a uniform calling
+# convention; this script does not use them.
+# shellcheck disable=SC2034
+GITHUB_PROJECT="${1:-kopecn}"
+# shellcheck disable=SC2034
+GITHUB_USER="${2:-kopecn}"
+
 # Sanity guard: macOS-only.
 if [[ "$(uname)" != "Darwin" ]]; then
   echo "❌ This script is macOS-only (Xcode CLT + Homebrew). Exiting."

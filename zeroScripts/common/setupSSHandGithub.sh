@@ -15,6 +15,14 @@
 
 set -euo pipefail
 
+# --- Positional contract (forwarded by zeroBringup.sh to every sub-script) ----
+# $1 = GitHub project/owner, $2 = GitHub user. Accepted for a uniform calling
+# convention; this script does not use them.
+# shellcheck disable=SC2034
+GITHUB_PROJECT="${1:-kopecn}"
+# shellcheck disable=SC2034
+GITHUB_USER="${2:-kopecn}"
+
 # === CONFIGURATION ===
 HOSTNAME_ID=$(hostname)
 KEY_NAME="id_ed25519_github_${HOSTNAME_ID}"

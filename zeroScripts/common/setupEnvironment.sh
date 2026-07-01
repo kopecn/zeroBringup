@@ -20,18 +20,20 @@ USER_NAME="${GITHUB_USER:-kopecn}"
 # Parallel arrays: REPOS[i] is cloned into $HOME/FOLDERS[i].
 # To add a new repository, append one entry to each array (keep them in sync).
 REPOS=(
-  "git@github.com:$USER_NAME/Environments.git"
+  "git@github.com:$USER_NAME/Environment.git"
   "git@github.com:$USER_NAME/bashTools.git"
   "git@github.com:$USER_NAME/zeroBringup.git"
   "git@github.com:$USER_NAME/productivity-macOS.git"
+  "git@github.com:$USER_NAME/claude-skills-memory.git"
 )
 
 # Target paths are relative to BASE_DIR ($HOME). Must be the same length as REPOS.
 FOLDERS=(
-  "__Environments__/Environments"
-  "__Workspaces__/bashWorkspaces/bashTools"
-  "__Workspaces__/bashWorkspaces/zeroBringup"
-  "__Workspaces__/productivityWorkspaces/productivity-macOS"
+  ".environment/Environment"
+  ".environment/bashWorkspaces/bashTools"
+  ".environment/bashWorkspaces/zeroBringup"
+  ".environment/productivity-macOS"
+  ".environment/claude-skills-memory"
 )
 
 # Base directory where all repos will be cloned

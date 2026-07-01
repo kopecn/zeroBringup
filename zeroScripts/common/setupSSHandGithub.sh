@@ -190,30 +190,22 @@ test_github_connection() {
 
 echo "📁 SSH Key path: $KEY_FILE"
 
+# Gate on the actual outcome (does GitHub SSH auth succeed?) rather than on a
+# guessed key filename. If a key for this host already exists, load it into the
+# agent first so the test can use it; otherwise ~/.ssh/config's IdentityFile
+# (from a prior run) still lets the test authenticate. Only if the connection
+# genuinely fails do we run the full key-generation workflow.
 if [[ -f "$KEY_FILE" ]]; then
-    echo "⚠️ SSH key file already exists."
-
     start_ssh_agent
-
-    if test_github_connection; then
-        echo "🎉 Existing SSH key works for GitHub. No need to generate a new key."
-        exit 0
-    else
-        echo "❗ Existing SSH key does not authenticate with GitHub."
-        read -rp "Do you want to overwrite it and generate a new SSH key? (y/N): " yn
-        case "$yn" in
-            [Yy]* )
-                rm -f "$KEY_FILE" "$KEY_FILE.pub"
-                ;;
-            * )
-                echo "Aborting."
-                exit 1
-                ;;
-        esac
-    fi
 fi
 
-# If we reached here, no key exists or user wants to generate new key
+if test_github_connection; then
+    echo "🎉 GitHub SSH already works. No need to run setup."
+    exit 0
+fi
+
+echo "🔧 No working GitHub SSH connection yet — starting setup workflow."
+
 generate_ssh_key
 start_ssh_agent
 update_ssh_config

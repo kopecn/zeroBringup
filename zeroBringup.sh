@@ -42,10 +42,13 @@ fi
 echo "Detected OS: $OS_TYPE"
 
 # Resolve the GitHub username once, here, and export it so each sub-script
-# inherits it (they each run in their own piped `bash -c`). Always prompts;
-# defaults to "kopecn" when left blank. Intentionally does NOT read the value
-# from `git config github.user`.
-read -rp "Enter your GitHub username [${DEFAULT_GITHUB_USER}]: " GITHUB_USER
+# inherits it (they each run in their own piped `bash -c`). Honors a value
+# passed via the environment (e.g. `GITHUB_USER=foo bash -c "$(curl ...)"`)
+# and only prompts when unset; defaults to "kopecn" when left blank.
+# Intentionally does NOT read the value from `git config github.user`.
+if [[ -z "${GITHUB_USER:-}" ]]; then
+    read -rp "Enter your GitHub username [${DEFAULT_GITHUB_USER}]: " GITHUB_USER
+fi
 GITHUB_USER="${GITHUB_USER:-$DEFAULT_GITHUB_USER}"
 export GITHUB_USER
 echo "Using GitHub username: $GITHUB_USER"

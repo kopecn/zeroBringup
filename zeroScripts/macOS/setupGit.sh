@@ -1,13 +1,24 @@
 #!/bin/bash
 # =============================================================================
-# Script Name  : setupGit.sh
-# Description  : Installs git (via apt on Ubuntu, Homebrew on macOS) and
-#                configures the global git user.name and user.email.
-# Prerequisites: Ubuntu with sudo access, or macOS with Homebrew installed
+# Script Name  : setupGit.sh (macOS)
+# Description  : Installs git via Homebrew and configures the global git
+#                user.name and user.email. macOS-only; the Ubuntu equivalent
+#                lives in zeroScripts/ubuntu/setupGit.sh.
+# Prerequisites: macOS (Darwin) with Homebrew installed. Run
+#                zeroScripts/macOS/setupXcodeAndBrew.sh first to ensure the
+#                Command Line Tools and Homebrew are present.
 # Side Effects : Installs the git package; writes to ~/.gitconfig
 # =============================================================================
 set -euo pipefail
 IFS=$'\n\t'
+
+# --- Positional contract (forwarded by zeroBringup.sh to every sub-script) ----
+# $1 = GitHub project/owner, $2 = GitHub user. Accepted for a uniform calling
+# convention; this script does not use them.
+# shellcheck disable=SC2034
+GITHUB_PROJECT="${1:-kopecn}"
+# shellcheck disable=SC2034
+GITHUB_USER="${2:-kopecn}"
 
 # -----------------------------------------------------------------------------
 # set_git_config
@@ -29,8 +40,8 @@ set_git_config() {
   # Prompt — show existing value in brackets if present, otherwise mark required
   local name_hint="${default_name:-(required)}"
   local email_hint="${default_email:-(required)}"
-  read -rp "Enter your Git user name [${name_hint}]: " git_user_name
-  read -rp "Enter your Git email [${email_hint}]: " git_user_email
+  read -rp "Setting git user name for this host [${name_hint}]: " git_user_name
+  read -rp "Setting git email for this host [${email_hint}]: " git_user_email
 
   # Use existing config value if user pressed Enter with no input
   git_user_name="${git_user_name:-$default_name}"
@@ -61,36 +72,21 @@ set_git_config() {
   fi
 }
 
-# Detect OS
-OS=""
-if [[ "$(uname)" == "Darwin" ]]; then
-  OS="darwin"
-elif grep -qi '^ID=ubuntu' /etc/os-release 2>/dev/null; then
-  OS="ubuntu"
-else
-  echo "Unsupported OS. This script supports only Ubuntu or macOS (Darwin). Exiting."
+# Sanity guard: this variant is Homebrew-based and macOS-only.
+if [[ "$(uname)" != "Darwin" ]]; then
+  echo "❌ This is the macOS variant (Homebrew) but a non-Darwin OS was detected."
+  echo "   On Ubuntu run zeroScripts/ubuntu/setupGit.sh instead. Exiting."
   exit 1
 fi
 
-echo "Detected OS: $OS"
-
-if [[ "$OS" == "ubuntu" ]]; then
-  echo "This will run: sudo apt update && sudo apt install git"
-  read -rp "Continue? (y/N): " apt_confirm
-  if [[ ! "$apt_confirm" =~ ^[Yy]$ ]]; then
-    echo "Aborted."
-    exit 1
-  fi
-  sudo apt update
-  sudo apt install git
-elif [[ "$OS" == "darwin" ]]; then
-  # Check if Homebrew is installed
-  if ! command -v brew &> /dev/null; then
-    echo "Homebrew is not installed. Please install Homebrew first: https://brew.sh/"
-    exit 1
-  fi
-  brew install git
+# Homebrew must already be installed (see setupXcodeAndBrew.sh).
+if ! command -v brew &>/dev/null; then
+  echo "❌ Homebrew is not installed. Run zeroScripts/macOS/setupXcodeAndBrew.sh"
+  echo "   first, or install it manually: https://brew.sh/  Exiting."
+  exit 1
 fi
+
+brew install git
 
 git --version
 

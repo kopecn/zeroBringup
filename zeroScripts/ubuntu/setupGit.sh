@@ -11,12 +11,16 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # --- Positional contract (forwarded by zeroBringup.sh to every sub-script) ----
-# $1 = GitHub project/owner, $2 = GitHub user. Accepted for a uniform calling
-# convention; this script does not use them.
+# $1 = GitHub project/owner, $2 = GitHub user, $4 = bashTools branch. Accepted
+# for a uniform calling convention; only $3 (OS type) is consumed, as the
+# sanity guard below. Standalone default reads the distro ID from os-release.
 # shellcheck disable=SC2034
 GITHUB_PROJECT="${1:-kopecn}"
 # shellcheck disable=SC2034
 GITHUB_USER="${2:-kopecn}"
+OS_TYPE="${3:-$( . /etc/os-release 2>/dev/null && echo "${ID:-$(uname)}" )}"
+# shellcheck disable=SC2034
+BASH_TOOLS_BRANCH="${4:-dev}"
 
 # -----------------------------------------------------------------------------
 # set_git_config
@@ -71,7 +75,7 @@ set_git_config() {
 }
 
 # Sanity guard: this variant is apt-based and Ubuntu-only.
-if ! grep -qi '^ID=ubuntu' /etc/os-release 2>/dev/null; then
+if [[ "$OS_TYPE" != "ubuntu" ]]; then
   echo "❌ This is the Ubuntu variant (apt) but a non-Ubuntu OS was detected."
   echo "   On macOS run zeroScripts/macOS/setupGit.sh instead. Exiting."
   exit 1

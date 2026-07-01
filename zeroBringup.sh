@@ -28,11 +28,13 @@ DEFAULT_LAUNCH_REPO="zeroBringup"
 #   repo that hosts this bootstrap and its sub-scripts
 DEFAULT_LAUNCH_SCRIPT="zeroScripts"
 #   sub-directory within LAUNCH_REPO holding the sub-scripts
+DEFAULT_BRANCH="prod"
+#   default branch this is published to
 ##### --- #####
 
 # Base URL for raw script content on the main branch of this repository.
 # Each sub-script is fetched and piped directly into bash at runtime.
-GITHUB_BASE_URL="https://raw.githubusercontent.com/${DEFAULT_GITHUB_PROJECT}/${DEFAULT_LAUNCH_REPO}/refs/heads/main/${DEFAULT_LAUNCH_SCRIPT}"
+GITHUB_BASE_URL="https://raw.githubusercontent.com/${DEFAULT_GITHUB_PROJECT}/${DEFAULT_LAUNCH_REPO}/refs/heads/${DEFAULT_BRANCH}/${DEFAULT_LAUNCH_SCRIPT}"
 
 # MARK: - 0. Parse flags
 # --local sources sub-scripts from the sibling zeroScripts/ dir instead of curl,

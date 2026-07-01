@@ -1,19 +1,45 @@
 #!/bin/bash
+# =============================================================================
+# Script Name  : setupEnvironment.sh
+# Description  : Clones the user's personal GitHub repositories into a
+#                standard directory layout under $HOME. Skips any repo that
+#                has already been cloned (idempotent).
+# Prerequisites: SSH/GitHub authentication must be configured (run
+#                setupSSHandGithub.sh first); git must be installed
+# Side Effects : Creates directories under $HOME and clones repositories;
+#                stores the GitHub username in git config global github.user
+# =============================================================================
+set -euo pipefail
+IFS=$'\n\t'
 
-USER_NAME=$(git config --global github.user)
+# Resolve the GitHub username — first try the stored git config value so
+# the script can run non-interactively after the first execution.
+USER_NAME=$(git config --global github.user 2>/dev/null || echo "")
 
-# Array of repository URLs
+if [[ -z "$USER_NAME" ]]; then
+    read -rp "Enter your GitHub username: " USER_NAME
+    if [[ -z "$USER_NAME" ]]; then
+        echo "❌ GitHub username is required. Aborting."
+        exit 1
+    fi
+    git config --global github.user "$USER_NAME"
+fi
+
+# Parallel arrays: REPOS[i] is cloned into $HOME/FOLDERS[i].
+# To add a new repository, append one entry to each array (keep them in sync).
 REPOS=(
   "git@github.com:$USER_NAME/Environments.git"
   "git@github.com:$USER_NAME/bashTools.git"
   "git@github.com:$USER_NAME/zeroBringup.git"
+  "git@github.com:$USER_NAME/productivity-macOS.git"
 )
 
-# Corresponding array of target folder names (must be same length as REPOS)
+# Target paths are relative to BASE_DIR ($HOME). Must be the same length as REPOS.
 FOLDERS=(
   "__Environments__/Environments"
   "__Workspaces__/bashWorkspaces/bashTools"
   "__Workspaces__/bashWorkspaces/zeroBringup"
+  "__Workspaces__/productivityWorkspaces/productivity-macOS"
 )
 
 # Base directory where all repos will be cloned
@@ -43,4 +69,4 @@ for i in "${!REPOS[@]}"; do
   fi
 done
 
-echo "All repositories processed."
+echo "✅ All repositories processed."

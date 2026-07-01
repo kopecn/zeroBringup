@@ -7,6 +7,11 @@
 #                reaches this file — so edit the owner/repo here to match your
 #                fork, then update the DEFAULT_* fork variables below.)
 # Prerequisites: macOS (Darwin) or Ubuntu; internet access to reach GitHub
+#                (not required with --local)
+# Flags        : --local  Source sub-scripts from the sibling zeroScripts/
+#                         directory instead of fetching them via curl. Bypasses
+#                         raw.githubusercontent.com CDN caching for testing;
+#                         used by `make run-local`.
 # Side Effects : Delegates all side effects to the sub-scripts below.
 # =============================================================================
 set -euo pipefail
@@ -28,6 +33,24 @@ DEFAULT_LAUNCH_SCRIPT="zeroScripts"
 # Base URL for raw script content on the main branch of this repository.
 # Each sub-script is fetched and piped directly into bash at runtime.
 GITHUB_BASE_URL="https://raw.githubusercontent.com/${DEFAULT_GITHUB_PROJECT}/${DEFAULT_LAUNCH_REPO}/refs/heads/main/${DEFAULT_LAUNCH_SCRIPT}"
+
+# MARK: - 0. Parse flags
+# --local sources sub-scripts from the sibling zeroScripts/ dir instead of curl,
+# so pushed-but-CDN-stale changes can be tested immediately.
+USE_LOCAL=0
+for arg in "$@"; do
+    case "$arg" in
+        --local) USE_LOCAL=1 ;;
+        *) echo "❌ Unknown argument: $arg (supported: --local)"; exit 1 ;;
+    esac
+done
+
+if [[ "$USE_LOCAL" -eq 1 ]]; then
+    # Resolve the local sub-script root relative to this file. Requires running
+    # as a real file (bash zeroBringup.sh), not the curl-pipe entrypoint.
+    LOCAL_SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/${DEFAULT_LAUNCH_SCRIPT}"
+    echo "🧪 LOCAL mode: sourcing sub-scripts from ${LOCAL_SCRIPTS_DIR} (CDN bypassed)"
+fi
 
 # MARK: - Configuration
 SUPPORTED_OS=(Darwin Linux)
@@ -100,7 +123,14 @@ for script in "${scripts[@]}"; do
     echo "▶️ ==================="
     echo "▶️ Running $script ..."
 
-    if ! script_body="$(curl -fsSL "${GITHUB_BASE_URL}/${script}")"; then
+    if [[ "$USE_LOCAL" -eq 1 ]]; then
+        local_src="${LOCAL_SCRIPTS_DIR}/${script}"
+        if [[ ! -f "$local_src" ]]; then
+            echo "❌ Local script not found: $local_src"
+            exit 1
+        fi
+        script_body="$(cat "$local_src")"
+    elif ! script_body="$(curl -fsSL "${GITHUB_BASE_URL}/${script}")"; then
         echo "❌ Failed to download $script from ${GITHUB_BASE_URL}/${script}"
         exit 1
     fi

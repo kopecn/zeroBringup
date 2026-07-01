@@ -38,8 +38,8 @@ set_git_config() {
   # Prompt — show existing value in brackets if present, otherwise mark required
   local name_hint="${default_name:-(required)}"
   local email_hint="${default_email:-(required)}"
-  read -rp "Setting Git user name for this host [${name_hint}]: " git_user_name
-  read -rp "Setting Git email for this host [${email_hint}]: " git_user_email
+  read -rp "Setting git user name for this host [${name_hint}]: " git_user_name
+  read -rp "Setting git email for this host [${email_hint}]: " git_user_email
 
   # Use existing config value if user pressed Enter with no input
   git_user_name="${git_user_name:-$default_name}"

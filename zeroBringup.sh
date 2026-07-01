@@ -22,21 +22,28 @@ IFS=$'\n\t'
 GITHUB_BASE_URL="https://raw.githubusercontent.com/kopecn/zeroBringup/refs/heads/main/zeroScripts"
 DEFAULT_GITHUB_USER="kopecn"
 
-# Detect OS
-OS_TYPE=""
-if [[ "$(uname)" == "Darwin" ]]; then
-    OS_TYPE="macOS"
-elif [[ -f /etc/os-release ]]; then
-    # shellcheck source=/dev/null
-    . /etc/os-release
-    if [[ "$ID" == "ubuntu" ]]; then
-        OS_TYPE="ubuntu"
-    fi
+# Configuration
+SUPPORTED_OS=(Darwin Linux)
+SUPPORTED_LINUX=(ubuntu fedora)
+
+# 1. Detect base OS
+UNAME=$(uname)
+if [[ " ${SUPPORTED_OS[*]} " =~ " ${UNAME} " ]]; then
+    OS_TYPE="$UNAME"
+else
+    echo "❌ Unsupported OS. Supported: ${SUPPORTED_OS[*]}"; exit 1
 fi
 
-if [[ -z "$OS_TYPE" ]]; then
-    echo "❌ Unsupported OS. This script supports only Ubuntu and macOS."
-    exit 1
+# 2. Refine if Linux
+if [[ "$OS_TYPE" == "Linux" ]]; then
+    # shellcheck source=/dev/null
+    [[ -f /etc/os-release ]] && . /etc/os-release
+
+    if [[ " ${SUPPORTED_LINUX[*]} " =~ " ${ID:-} " ]]; then
+        OS_TYPE="$ID"
+    else
+        echo "❌ Unsupported Linux distro. Supported: ${SUPPORTED_LINUX[*]}"; exit 1
+    fi
 fi
 
 echo "Detected OS: $OS_TYPE"

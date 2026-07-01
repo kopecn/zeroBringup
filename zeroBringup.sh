@@ -30,6 +30,8 @@ DEFAULT_LAUNCH_SCRIPT="zeroScripts"
 #   sub-directory within LAUNCH_REPO holding the sub-scripts
 DEFAULT_BRANCH="prod"
 #   default branch this is published to
+BASH_TOOLS_BRANCH="feat/cont-work-02" #"dev"
+#   default branch that bash tools installs to
 ##### --- #####
 
 # Base URL for raw script content on the main branch of this repository.
@@ -138,8 +140,9 @@ for script in "${scripts[@]}"; do
     fi
 
     # Forward the project/user to every sub-script positionally ($0=name,
-    # $1=project, $2=user), whether or not that script consumes them.
-    if ! /bin/bash -c "$script_body" "$script" "$GITHUB_PROJECT" "$GITHUB_USER"; then
+    # $1=project, $2=user, $3=OS_TYPE, $4=bash-tools branch), whether or not
+    # that script consumes them.
+    if ! /bin/bash -c "$script_body" "$script" "$GITHUB_PROJECT" "$GITHUB_USER" "$OS_TYPE" "$BASH_TOOLS_BRANCH"; then
         echo "❌ Error running $script"
         exit 1
     fi

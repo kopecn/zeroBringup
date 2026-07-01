@@ -13,12 +13,16 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # --- Positional contract (forwarded by zeroBringup.sh to every sub-script) ----
-# $1 = GitHub project/owner, $2 = GitHub user. Accepted for a uniform calling
-# convention; this script does not use them.
+# $1 = GitHub project/owner, $2 = GitHub user, $4 = bashTools branch. Accepted
+# for a uniform calling convention; only $3 (OS type) is consumed, as the
+# sanity guard below.
 # shellcheck disable=SC2034
 GITHUB_PROJECT="${1:-kopecn}"
 # shellcheck disable=SC2034
 GITHUB_USER="${2:-kopecn}"
+OS_TYPE="${3:-$(uname)}"
+# shellcheck disable=SC2034
+BASH_TOOLS_BRANCH="${4:-dev}"
 
 # -----------------------------------------------------------------------------
 # set_git_config
@@ -73,7 +77,7 @@ set_git_config() {
 }
 
 # Sanity guard: this variant is Homebrew-based and macOS-only.
-if [[ "$(uname)" != "Darwin" ]]; then
+if [[ "$OS_TYPE" != "Darwin" ]]; then
   echo "❌ This is the macOS variant (Homebrew) but a non-Darwin OS was detected."
   echo "   On Ubuntu run zeroScripts/ubuntu/setupGit.sh instead. Exiting."
   exit 1

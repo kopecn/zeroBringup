@@ -22,7 +22,6 @@ Scripts live in `zeroScripts/`, split by responsibility:
 | `ubuntu/` | `setupGit.sh`          | Ubuntu  | `apt install git`; set global user.name/email       |
 | `common/` | `setupSSHandGithub.sh` | both    | Generate ED25519 SSH key, configure & verify GitHub |
 | `common/` | `pullBashTools.sh`     | both    | Clone personal repos into the standard layout       |
-| `common/` | `linkBashTools.sh`     | both    | Append `bashTools/hostScripts` to PATH              |
 
 The OS-specific batch runs first (it installs the prerequisites the common batch
 depends on), then the common batch runs identically on both platforms.
@@ -51,7 +50,7 @@ flowchart TD
 
     subgraph Common ["common batch"]
         direction TB
-        C1["setupSSHandGithub.sh<br/>SSH key + GitHub auth"] --> C2["pullBashTools.sh<br/>clone repos"] --> C3["linkBashTools.sh<br/>PATH wiring"]
+        C1["setupSSHandGithub.sh<br/>SSH key + GitHub auth"] --> C2["pullBashTools.sh<br/>clone repos"] --> C3["fixme.sh<br/>PATH wiring"]
     end
 
     Common --> Done(["Environment ready"])

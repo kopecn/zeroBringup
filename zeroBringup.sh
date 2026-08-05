@@ -99,7 +99,47 @@ GITHUB_USER="${GITHUB_USER:-$DEFAULT_GITHUB_USER}"
 echo "Using GitHub project: $GITHUB_PROJECT"
 echo "Using GitHub user:    $GITHUB_USER"
 
-# MARK: - 4. Ordered list 
+# MARK: - 3.5 Require a clean slate under $HOME/.environment
+# This is a zero-to-working bootstrap: every repo below is meant to be cloned
+# fresh. A directory left over from an earlier run shadows that clone — the pull
+# sub-scripts skip cloning when a .git is already present — so the bootstrap
+# proceeds against whatever stale commit happens to be checked out. Refuse to
+# guess at reconciling that; delete on confirmation, or abort.
+ENVIRONMENT_ROOT="$HOME/.environment"
+MANAGED_CLONES=(
+    "bashTools"
+    "claude-skills-memory"
+    "Environment"
+    "my-galaxy-playbooks"
+)
+
+EXISTING_CLONES=()
+for clone in "${MANAGED_CLONES[@]}"; do
+    if [[ -e "${ENVIRONMENT_ROOT}/${clone}" ]]; then
+        EXISTING_CLONES+=("${ENVIRONMENT_ROOT}/${clone}")
+    fi
+done
+
+# Guard the expansion: under `set -u`, "${arr[@]}" on an empty array is an error
+# in the bash 3.2 that ships with macOS.
+if [[ ${#EXISTING_CLONES[@]} -gt 0 ]]; then
+    echo "⚠️  These directories already exist and would shadow a fresh clone:"
+    printf '     %s\n' "${EXISTING_CLONES[@]}"
+    echo "     Any uncommitted or unpushed work in them will be lost."
+    read -rp "Delete them and continue? [y/N]: " CONFIRM_DELETE
+
+    if [[ ! "${CONFIRM_DELETE:-}" =~ ^[Yy]$ ]]; then
+        echo "❌ Aborted. Remove or relocate the directories above, then re-run."
+        exit 1
+    fi
+
+    for dir in "${EXISTING_CLONES[@]}"; do
+        echo "🗑  Removing $dir"
+        rm -rf "$dir"
+    done
+fi
+
+# MARK: - 4. Ordered list
 # of sub-scripts to execute. 
 if [[ "$OS_TYPE" == "Darwin" ]]; then
     scripts=(

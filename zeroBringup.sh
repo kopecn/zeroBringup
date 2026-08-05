@@ -30,7 +30,7 @@ DEFAULT_LAUNCH_SCRIPT="zeroScripts"
 #   sub-directory within LAUNCH_REPO holding the sub-scripts
 DEFAULT_BRANCH="prod"
 #   default branch this is published to
-BASH_TOOLS_BRANCH="feat/cont-work-02" #"dev"
+BASH_TOOLS_BRANCH="dev" #"dev"
 #   default branch that bash tools installs to
 ##### --- #####
 

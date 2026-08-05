@@ -16,7 +16,7 @@
 set -euo pipefail
 
 # --- Positional contract (forwarded by zeroBringup.sh to every sub-script) ----
-# $1 = GitHub project/owner, $2 = GitHub user, $3 = OS type, $4 = bashTools
+# $1 = GitHub project/owner, $2 = GitHub user, $3 = OS type, $4 = install
 # branch. Accepted for a uniform calling convention; this script uses none.
 # shellcheck disable=SC2034
 GITHUB_PROJECT="${1:-kopecn}"
@@ -25,7 +25,7 @@ GITHUB_USER="${2:-kopecn}"
 # shellcheck disable=SC2034
 OS_TYPE="${3:-$(uname)}"
 # shellcheck disable=SC2034
-BASH_TOOLS_BRANCH="${4:-dev}"
+INSTALL_BRANCH="${4:-prod}"
 
 # === CONFIGURATION ===
 HOSTNAME_ID=$(hostname)

@@ -11,7 +11,9 @@
 # Arguments    : $1 = GitHub project/owner that hosts bashTools (used here)
 #                $2 = GitHub user running the bootstrap (accepted, unused)
 #                $3 = detected OS type (accepted, unused)
-#                $4 = bashTools branch to check out after clone (defaults to dev)
+#                $4 = branch to check out after clone, and forwarded through
+#                     `make install-bash-tools` to every repo bashTools pulls
+#                     (defaults to prod)
 #                All are forwarded by zeroBringup.sh; defaults let this run
 #                standalone.
 # =============================================================================
@@ -23,7 +25,7 @@ GITHUB_PROJECT="${1:-kopecn}"   # account that OWNS the repos being cloned
 GITHUB_USER="${2:-kopecn}"      # identity of the person running the bootstrap
 # shellcheck disable=SC2034
 OS_TYPE="${3:-$(uname)}"        # detected OS (unused here; uniform contract)
-TARGET_BRANCH="${4:-dev}"       # bashTools branch to check out after clone
+TARGET_BRANCH="${4:-prod}"      # branch to check out, and to forward downstream
 
 REPO_URL="git@github.com:$GITHUB_PROJECT/bashTools.git"
 TARGET_DIR="$HOME/.environment/bashTools"
@@ -41,5 +43,8 @@ echo "Checking out branch '$TARGET_BRANCH' in $TARGET_DIR..."
 
 # Install the tools from the repo root. Run in a subshell so the cd does not
 # leak into the caller's working directory.
-echo "▶️ Running 'make install-bash-tools' in $TARGET_DIR ..."
-( cd "$TARGET_DIR" && make install-bash-tools )
+# INSTALL_BRANCH carries the branch across the make boundary into install.sh,
+# which forwards it to every pull*.sh it runs. Without it the whole chain
+# silently falls back to each script's own default.
+echo "▶️ Running 'make install-bash-tools INSTALL_BRANCH=$TARGET_BRANCH' in $TARGET_DIR ..."
+( cd "$TARGET_DIR" && make install-bash-tools INSTALL_BRANCH="$TARGET_BRANCH" )

@@ -1,7 +1,7 @@
 # Zero Bringup
 
 ```sh
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/kopecn/zeroBringup/refs/heads/main/zeroBringup.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/kopecn/zeroBringup/refs/heads/dev/zeroBringup.sh)"
 ```
 
 Bootstraps a fresh **macOS** or **Ubuntu** machine into a ready-to-work

@@ -35,9 +35,15 @@ else
   git clone "$REPO_URL" "$TARGET_DIR"
 fi
 
-# Ensure we are on the requested branch (fetch first so it exists locally).
+# Ensure we are on the requested branch AND that it matches the remote. A
+# pre-existing clone keeps a stale local branch after `fetch` + `checkout`, so
+# fast-forward it explicitly; --ff-only fails loudly rather than discarding
+# local commits.
 echo "Checking out branch '$TARGET_BRANCH' in $TARGET_DIR..."
-( cd "$TARGET_DIR" && git fetch origin "$TARGET_BRANCH" && git checkout "$TARGET_BRANCH" )
+( cd "$TARGET_DIR" \
+  && git fetch origin "$TARGET_BRANCH" \
+  && git checkout "$TARGET_BRANCH" \
+  && git merge --ff-only "origin/$TARGET_BRANCH" )
 
 # Install the tools from the repo root. Run in a subshell so the cd does not
 # leak into the caller's working directory.

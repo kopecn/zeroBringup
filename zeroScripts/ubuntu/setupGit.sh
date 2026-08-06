@@ -20,7 +20,7 @@ GITHUB_PROJECT="${1:-kopecn}"
 GITHUB_USER="${2:-kopecn}"
 OS_TYPE="${3:-$( . /etc/os-release 2>/dev/null && echo "${ID:-$(uname)}" )}"
 # shellcheck disable=SC2034
-INSTALL_BRANCH="${4:-prod}"
+INSTALL_BRANCH="${4:-dev}"
 
 # -----------------------------------------------------------------------------
 # set_git_config

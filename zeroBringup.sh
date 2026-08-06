@@ -12,6 +12,11 @@
 #                         directory instead of fetching them via curl. Bypasses
 #                         raw.githubusercontent.com CDN caching for testing;
 #                         used by `make run-local`.
+#                --prod   Run against the released branch ($PROD_BRANCH)
+#                         instead of the canonical default ($DEFAULT_BRANCH).
+#                         Switches BOTH the branch sub-scripts are fetched from
+#                         and the branch checked out in every repo installed;
+#                         used by `make run-prod`.
 # Side Effects : Delegates all side effects to the sub-scripts below.
 # =============================================================================
 set -euo pipefail
@@ -28,29 +33,35 @@ DEFAULT_LAUNCH_REPO="zeroBringup"
 #   repo that hosts this bootstrap and its sub-scripts
 DEFAULT_LAUNCH_SCRIPT="zeroScripts"
 #   sub-directory within LAUNCH_REPO holding the sub-scripts
-DEFAULT_BRANCH="prod"
-#   default branch this is published to
-INSTALL_BRANCH="dev"
-#   branch checked out in EVERY repo this bootstrap installs — bashTools here,
-#   and (forwarded through bashTools' install.sh) Environment,
-#   claude-skills-memory and my-galaxy-playbooks. Single knob: set it to "prod"
-#   for a real install, "dev" to test unreleased changes.
+DEFAULT_BRANCH="dev"
+#   canonical branch. ONE knob for the whole chain: it is both the branch this
+#   bootstrap fetches its sub-scripts from and the branch checked out in EVERY
+#   repo it installs — bashTools here, and (forwarded through bashTools'
+#   install.sh) Environment, claude-skills-memory and my-galaxy-playbooks.
+PROD_BRANCH="prod"
+#   released branch. Opt in with --prod; never the default.
 ##### --- #####
-
-# Base URL for raw script content on the main branch of this repository.
-# Each sub-script is fetched and piped directly into bash at runtime.
-GITHUB_BASE_URL="https://raw.githubusercontent.com/${DEFAULT_GITHUB_PROJECT}/${DEFAULT_LAUNCH_REPO}/refs/heads/${DEFAULT_BRANCH}/${DEFAULT_LAUNCH_SCRIPT}"
 
 # MARK: - 0. Parse flags
 # --local sources sub-scripts from the sibling zeroScripts/ dir instead of curl,
 # so pushed-but-CDN-stale changes can be tested immediately.
+# --prod moves the whole chain off the canonical dev branch onto the released
+# one; parsed before GITHUB_BASE_URL is built because it selects that URL.
 USE_LOCAL=0
+INSTALL_BRANCH="$DEFAULT_BRANCH"
 for arg in "$@"; do
     case "$arg" in
         --local) USE_LOCAL=1 ;;
-        *) echo "❌ Unknown argument: $arg (supported: --local)"; exit 1 ;;
+        --prod) INSTALL_BRANCH="$PROD_BRANCH" ;;
+        *) echo "❌ Unknown argument: $arg (supported: --local, --prod)"; exit 1 ;;
     esac
 done
+
+echo "🌿 Branch: $INSTALL_BRANCH"
+
+# Base URL for raw script content on the selected branch of this repository.
+# Each sub-script is fetched and piped directly into bash at runtime.
+GITHUB_BASE_URL="https://raw.githubusercontent.com/${DEFAULT_GITHUB_PROJECT}/${DEFAULT_LAUNCH_REPO}/refs/heads/${INSTALL_BRANCH}/${DEFAULT_LAUNCH_SCRIPT}"
 
 if [[ "$USE_LOCAL" -eq 1 ]]; then
     # Resolve the local sub-script root relative to this file. Requires running

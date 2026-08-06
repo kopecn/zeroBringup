@@ -4,7 +4,7 @@ UNAME_S := $(shell uname -s)
 
 .DEFAULT_GOAL := help
 
-.PHONY: help open-github run run-local
+.PHONY: help open-github run run-local run-prod
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -15,6 +15,9 @@ run: ## run the bootstrap (fetches sub-scripts via curl)
 
 run-local: ## run the bootstrap against local sub-scripts (bypass CDN cache)
 	@bash zeroBringup.sh --local
+
+run-prod: ## run the bootstrap against the released (prod) branch
+	@bash zeroBringup.sh --prod
 
 open-github: ## Open the GitHub repository in the default browser (macOS/Linux)
 	@remote=$$(git remote | head -1); \

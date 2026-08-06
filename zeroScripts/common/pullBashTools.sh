@@ -13,7 +13,7 @@
 #                $3 = detected OS type (accepted, unused)
 #                $4 = branch to check out after clone, and forwarded through
 #                     `make install-bash-tools` to every repo bashTools pulls
-#                     (defaults to prod)
+#                     (defaults to dev)
 #                All are forwarded by zeroBringup.sh; defaults let this run
 #                standalone.
 # =============================================================================
@@ -25,7 +25,7 @@ GITHUB_PROJECT="${1:-kopecn}"   # account that OWNS the repos being cloned
 GITHUB_USER="${2:-kopecn}"      # identity of the person running the bootstrap
 # shellcheck disable=SC2034
 OS_TYPE="${3:-$(uname)}"        # detected OS (unused here; uniform contract)
-TARGET_BRANCH="${4:-prod}"      # branch to check out, and to forward downstream
+TARGET_BRANCH="${4:-dev}"      # branch to check out, and to forward downstream
 
 REPO_URL="git@github.com:$GITHUB_PROJECT/bashTools.git"
 TARGET_DIR="$HOME/.environment/bashTools"

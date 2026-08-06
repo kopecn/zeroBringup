@@ -1,8 +1,18 @@
 # Zero Bringup
 
+Default (canonical `dev` branch):
+
 ```sh
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/kopecn/zeroBringup/refs/heads/dev/zeroBringup.sh)"
 ```
+
+Released (`prod` branch) — opt in with `--prod`:
+
+```sh
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/kopecn/zeroBringup/refs/heads/prod/zeroBringup.sh)" zeroBringup.sh --prod
+```
+
+`dev` is the default everywhere: it is the branch sub-scripts are fetched from and the branch checked out in every repo the bootstrap installs. `--prod` switches the whole chain at once. The extra `zeroBringup.sh` argument is `$0` for the piped script — `bash -c` needs it before flags reach `$1`.
 
 Bootstraps a fresh **macOS** or **Ubuntu** machine into a ready-to-work
 development environment with a single command. `zeroBringup.sh` detects the OS,

@@ -64,9 +64,41 @@ ensure_command_line_tools() {
 #   /opt/homebrew; on Intel at /usr/local. Persists the shellenv line to
 #   ~/.zprofile so future shells find brew without re-running this script.
 # -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# persist_shellenv <brew_bin>
+#   Append the `brew shellenv` line to ~/.zprofile so future login shells find
+#   brew. Idempotent. Runs whether brew was installed just now or already
+#   present — an existing install with no ~/.zprofile entry is exactly how a
+#   machine ends up with brew on disk but off PATH.
+# -----------------------------------------------------------------------------
+persist_shellenv() {
+  local brew_bin="$1"
+  local shellenv_line="eval \"\$(${brew_bin} shellenv)\""
+
+  if ! grep -Fxq "$shellenv_line" "$HOME/.zprofile" 2>/dev/null; then
+    echo "$shellenv_line" >> "$HOME/.zprofile"
+    echo "✅ Added Homebrew to PATH in ~/.zprofile"
+  fi
+}
+
 ensure_homebrew() {
+  # Brew may be installed but absent from PATH: this runs as a non-login,
+  # non-interactive shell, so the ~/.zprofile line below is not in effect.
+  # Resolve the known install locations before concluding it is missing —
+  # otherwise a machine that already has Homebrew re-runs the installer.
+  if ! command -v brew &>/dev/null; then
+    local candidate
+    for candidate in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+      if [[ -x "$candidate" ]]; then
+        eval "$("$candidate" shellenv)"
+        break
+      fi
+    done
+  fi
+
   if command -v brew &>/dev/null; then
     echo "ℹ️  Homebrew already installed at: $(command -v brew)"
+    persist_shellenv "$(command -v brew)"
     return 0
   fi
 
@@ -88,11 +120,7 @@ ensure_homebrew() {
 
   # Load brew into this session and persist for future zsh login shells.
   eval "$("$brew_bin" shellenv)"
-  local shellenv_line="eval \"\$(${brew_bin} shellenv)\""
-  if ! grep -Fxq "$shellenv_line" "$HOME/.zprofile" 2>/dev/null; then
-    echo "$shellenv_line" >> "$HOME/.zprofile"
-    echo "✅ Added Homebrew to PATH in ~/.zprofile"
-  fi
+  persist_shellenv "$brew_bin"
 
   echo "✅ Homebrew installed: $(brew --version | head -n1)"
 }

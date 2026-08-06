@@ -120,11 +120,15 @@ echo "Using GitHub user:    $GITHUB_USER"
 # proceeds against whatever stale commit happens to be checked out. Refuse to
 # guess at reconciling that; delete on confirmation, or abort.
 ENVIRONMENT_ROOT="$HOME/.environment"
+# Every repo setupEnvironment.sh clones, EXCEPT zeroBringup itself — this script
+# is running from that checkout, so deleting it would saw off the branch we sit
+# on. Keep in sync with bashTools' installScripts/common/setupEnvironment.sh.
 MANAGED_CLONES=(
     "bashTools"
     "claude-skills-memory"
     "Environment"
     "my-galaxy-playbooks"
+    "productivity"
 )
 
 EXISTING_CLONES=()
